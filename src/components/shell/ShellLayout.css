@@ -46,12 +46,12 @@
 .shell-layout__main {
   grid-row: 2;
   grid-column: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  align-self: start;
 }
 .shell-layout__container[data-has-floating-nav="true"] .shell-layout__main {
   padding: var(--shell-layout-padding-top) calc(var(--shell-layout-padding-side-default) + var(--space-5)) var(--space-6) calc(var(--shell-layout-padding-side-default) + var(--space-5));

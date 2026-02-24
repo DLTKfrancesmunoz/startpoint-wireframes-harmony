@@ -11,7 +11,7 @@ import { ShellHeader } from './ShellHeader';
 import { ShellFooter, type Tab } from './ShellFooter';
 import { ProjectsView } from '../ProjectsView';
 import { ProjectDetailView } from '../ProjectDetailView';
-import type { CreateProjectForm } from '../CreateProjectModal';
+import { projectFromCreateForm, type Project } from '../../types/project';
 import './ShellLayout.css';
 
 const SAMPLE_TABS: Tab[] = [
@@ -28,7 +28,7 @@ export default function ShellLayout() {
   const leftVariant = 'vp';
   const rightVariant = 'vp';
 
-  const [selectedProject, setSelectedProject] = useState<CreateProjectForm | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const showDetail = selectedProject !== null;
 
   return (
@@ -61,10 +61,11 @@ export default function ShellLayout() {
             <ProjectDetailView
               project={selectedProject}
               onBack={() => setSelectedProject(null)}
+              onProjectUpdate={(p) => setSelectedProject(p)}
             />
           ) : (
             <ProjectsView
-              onProjectCreated={(form) => setSelectedProject(form)}
+              onProjectCreated={(form) => setSelectedProject(projectFromCreateForm(form))}
             />
           )}
         </main>
