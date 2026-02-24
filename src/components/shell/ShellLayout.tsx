@@ -11,6 +11,7 @@ import { ShellHeader } from './ShellHeader';
 import { ShellFooter, type Tab } from './ShellFooter';
 import { ProjectsView } from '../ProjectsView';
 import { ProjectDetailView } from '../ProjectDetailView';
+import type { CreateProjectForm } from '../CreateProjectModal';
 import { projectFromCreateForm, type Project } from '../../types/project';
 import './ShellLayout.css';
 
@@ -28,8 +29,22 @@ export default function ShellLayout() {
   const leftVariant = 'vp';
   const rightVariant = 'vp';
 
+  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const showDetail = selectedProject !== null;
+
+  const handleProjectCreated = (form: CreateProjectForm) => {
+    const p = projectFromCreateForm(form);
+    setProjects((prev) => [...prev, p]);
+    setSelectedProject(p);
+  };
+
+  const handleProjectUpdate = (p: Project) => {
+    setSelectedProject(p);
+    setProjects((prev) =>
+      prev.map((proj) => (proj.projectId === p.projectId ? p : proj))
+    );
+  };
 
   return (
     <div
@@ -61,11 +76,13 @@ export default function ShellLayout() {
             <ProjectDetailView
               project={selectedProject}
               onBack={() => setSelectedProject(null)}
-              onProjectUpdate={(p) => setSelectedProject(p)}
+              onProjectUpdate={handleProjectUpdate}
             />
           ) : (
             <ProjectsView
-              onProjectCreated={(form) => setSelectedProject(projectFromCreateForm(form))}
+              projects={projects}
+              onProjectCreated={handleProjectCreated}
+              onSelectProject={setSelectedProject}
             />
           )}
         </main>

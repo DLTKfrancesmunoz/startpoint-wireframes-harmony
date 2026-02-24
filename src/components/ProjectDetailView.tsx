@@ -23,6 +23,37 @@ const MOCK_USERS: DropdownOption[] = [
   { value: 'u3', label: 'Sam Rivera' },
 ];
 
+const STATUS_OPTIONS: DropdownOption[] = [
+  { value: 'Preliminary', label: 'Preliminary' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Hold', label: 'Hold' },
+  { value: 'Work Hold', label: 'Work Hold' },
+  { value: 'Billing Hold', label: 'Billing Hold' },
+  { value: 'Closed', label: 'Closed' },
+];
+
+const MOCK_CLIENTS: DropdownOption[] = [
+  { value: 'c1', label: 'Acme Corp' },
+  { value: 'c2', label: 'Brookside Dev' },
+  { value: 'c3', label: 'Harbor View LLC' },
+];
+
+const BILLING_TYPE_OPTIONS: DropdownOption[] = [
+  { value: 'Time & Expense', label: 'Time & Expense' },
+  { value: 'Fixed Fee', label: 'Fixed Fee' },
+  { value: 'Percent Complete', label: 'Percent Complete' },
+  { value: 'Unit Price', label: 'Unit Price' },
+  { value: 'Percent of Construction Cost', label: 'Percent of Construction Cost' },
+  { value: 'NonBillable', label: 'NonBillable' },
+  { value: 'Marketing', label: 'Marketing' },
+  { value: 'Overhead', label: 'Overhead' },
+];
+
+const MOCK_RATE_TABLES: DropdownOption[] = [
+  { value: 'rt1', label: 'Standard Rates' },
+  { value: 'rt2', label: 'Premium Rates' },
+];
+
 const REVENUE_METHOD_OPTIONS: DropdownOption[] = [
   { value: 'Billed + WIP', label: 'Billed + WIP' },
   { value: 'Billed', label: 'Billed' },
@@ -95,7 +126,7 @@ export function ProjectDetailView({ project, onBack, onProjectUpdate }: ProjectD
       }
     : {
         outlineButton1: { text: 'Back to Projects', onClick: onBack },
-        outlineButton2: onProjectUpdate ? { text: 'Edit', onClick: () => setIsEditing(true) } : undefined,
+        primaryButton: onProjectUpdate ? { text: 'Edit', onClick: () => setIsEditing(true) } : undefined,
       };
 
   return (
@@ -107,15 +138,87 @@ export function ProjectDetailView({ project, onBack, onProjectUpdate }: ProjectD
         {...headerActions}
       />
 
-      {/* Overview – read-only (creation fields) */}
+      {/* Overview */}
       <Card primary elevated withHeader headerTitle="Overview" headerSubtitle="">
         <div className="card__body project-detail__card-grid">
-          <DetailField label="Project name" value={edit.projectName} fullWidth />
-          <DetailField label="Project ID" value={edit.projectId} />
-          <DetailField label="Status" value={edit.status} />
-          {showClient && <DetailField label="Client" value={edit.clientId} />}
-          <DetailField label="Billing type" value={edit.billingType} />
-          {showRateTable && <DetailField label="Rate table" value={edit.rateTableId} />}
+          {!isEditing ? (
+            <>
+              <DetailField label="Project name" value={edit.projectName} fullWidth />
+              <DetailField label="Project ID" value={edit.projectId} />
+              <DetailField label="Status" value={edit.status} />
+              {showClient && <DetailField label="Client" value={edit.clientId} />}
+              <DetailField label="Billing type" value={edit.billingType} />
+              {showRateTable && <DetailField label="Rate table" value={edit.rateTableId} />}
+            </>
+          ) : (
+            <>
+              <div className="project-detail__field project-detail__card-grid--full" style={fullWidthStyle}>
+                <Input
+                  label="Project name"
+                  labelVariant="stacked"
+                  value={edit.projectName}
+                  onChange={(e) => setEdit((p) => ({ ...p, projectName: e.target.value }))}
+                  placeholder="—"
+                  maxLength={80}
+                />
+              </div>
+              <div className="project-detail__field">
+                <Input
+                  label="Project ID / Number"
+                  labelVariant="stacked"
+                  value={edit.projectId}
+                  onChange={(e) => setEdit((p) => ({ ...p, projectId: e.target.value }))}
+                  placeholder="—"
+                />
+              </div>
+              <div className="project-detail__field">
+                <Dropdown
+                  label="Status"
+                  labelVariant="stacked"
+                  options={STATUS_OPTIONS}
+                  value={edit.status}
+                  onChange={(v) => setEdit((p) => ({ ...p, status: v }))}
+                  className="dropdown--full-width"
+                />
+              </div>
+              {showClient && (
+                <div className="project-detail__field">
+                  <Dropdown
+                    label="Client"
+                    labelVariant="stacked"
+                    options={MOCK_CLIENTS}
+                    value={edit.clientId ?? ''}
+                    placeholder="Select client"
+                    onChange={(v) => setEdit((p) => ({ ...p, clientId: v || undefined }))}
+                    className="dropdown--full-width"
+                  />
+                </div>
+              )}
+              <div className="project-detail__field">
+                <Dropdown
+                  label="Billing type"
+                  labelVariant="stacked"
+                  options={BILLING_TYPE_OPTIONS}
+                  value={edit.billingType}
+                  onChange={(v) => setEdit((p) => ({ ...p, billingType: v }))}
+                  className="dropdown--full-width"
+                />
+              </div>
+              {showRateTable && (
+                <div className="project-detail__field">
+                  <Dropdown
+                    label="Rate table"
+                    labelVariant="stacked"
+                    options={MOCK_RATE_TABLES}
+                    value={edit.rateTableId ?? ''}
+                    placeholder="Select rate table"
+                    onChange={(v) => setEdit((p) => ({ ...p, rateTableId: v || undefined }))}
+                    className="dropdown--full-width"
+                  />
+                </div>
+              )}
+            </>
+          )}
         </div>
       </Card>
 
