@@ -108,7 +108,7 @@ const REVENUE_METHOD_OPTIONS: DropdownOption[] = [
 export interface ProjectDetailViewProps {
   project: Project;
   onBack: () => void;
-  onProjectUpdate?: (project: Project) => void;
+  onProjectUpdate?: (project: Project, originalProjectId?: string) => void;
 }
 
 function DetailField({
@@ -146,7 +146,7 @@ export function ProjectDetailView({ project, onBack, onProjectUpdate }: ProjectD
   const showConstructionCost = isConstructionCostBillingType(edit.billingType);
 
   const handleSave = () => {
-    onProjectUpdate?.(edit);
+    onProjectUpdate?.(edit, project.projectId);
     setIsEditing(false);
   };
 

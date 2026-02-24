@@ -64,10 +64,11 @@ export default function ShellLayout() {
     setSelectedProject(p);
   };
 
-  const handleProjectUpdate = (p: Project) => {
+  const handleProjectUpdate = (p: Project, originalProjectId?: string) => {
     setSelectedProject(p);
+    const idToReplace = originalProjectId ?? p.projectId;
     setProjects((prev) =>
-      prev.map((proj) => (proj.projectId === p.projectId ? p : proj))
+      prev.map((proj) => (proj.projectId === idToReplace ? p : proj))
     );
   };
 

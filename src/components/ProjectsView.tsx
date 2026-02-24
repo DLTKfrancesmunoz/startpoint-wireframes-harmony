@@ -47,7 +47,7 @@ export function ProjectsView({
             onClick: () => setCreateModalOpen(true),
           }}
         />
-        <Card primary elevated withHeader headerTitle="Projects" headerSubtitle="">
+        <Card primary elevated withHeader={false}>
           <div className="card__body" style={{ padding: 0 }}>
             {projects.length === 0 ? (
               <p
