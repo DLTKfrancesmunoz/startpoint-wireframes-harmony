@@ -1,0 +1,30 @@
+/* Dialog – layout-builder sizing for variable-length content (e.g. Create Project form) */
+.dialog.dialog--form {
+  min-height: 80vh;
+  max-height: 90vh;
+}
+
+.dialog.dialog--form .dialog__body {
+  min-height: 60vh;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Dialog close button – avoid red square (reset + focus-visible) */
+.dialog__close {
+  background: transparent;
+  border: none;
+  padding: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.dialog__close:focus-visible {
+  box-shadow: var(--focus-ring-primary);
+}
+
+.dialog__close svg {
+  color: currentColor;
+}

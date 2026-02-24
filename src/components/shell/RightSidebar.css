@@ -1,0 +1,38 @@
+/* RightSidebar – scoped variant visibility + icon color pitfall (dark-mode img filters) */
+.right-sidebar__variant {
+  display: none;
+}
+html.theme-cp .right-sidebar__variant--cp,
+html.theme-cp.dark .right-sidebar__variant--cp {
+  display: contents;
+}
+html.theme-vp .right-sidebar__variant--vp,
+html.theme-vp.dark .right-sidebar__variant--vp {
+  display: contents;
+}
+html.theme-ppm .right-sidebar__variant--ppm,
+html.theme-ppm.dark .right-sidebar__variant--ppm {
+  display: contents;
+}
+html.theme-maconomy .right-sidebar__variant--maconomy,
+html.theme-maconomy.dark .right-sidebar__variant--maconomy {
+  display: contents;
+}
+
+/* Icons: inline SVG vs img (pitfall) – <img> icons do not inherit color; use filter in dark mode */
+html.dark .right-sidebar__dela-logo--default,
+html.dark .right-sidebar__dela-logo:not(.right-sidebar__dela-logo--active) {
+  filter: brightness(0) invert(1);
+}
+html.dark .right-sidebar__icon img:not(.right-sidebar__dela-logo--active) {
+  filter: brightness(0) invert(1);
+}
+html.dark .right-sidebar__icon-img {
+  filter: brightness(0) invert(1);
+}
+
+/* Dela logo size (Icon or img) */
+.right-sidebar__dela-logo {
+  width: 36px;
+  height: 36px;
+}

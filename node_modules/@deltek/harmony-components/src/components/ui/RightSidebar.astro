@@ -1,0 +1,592 @@
+---
+/**
+ * RightSidebar Component
+ *
+ * A unified right navigation sidebar that supports multiple themes (cp, vp, ppm, maconomy).
+ * Shows only icons when collapsed, expands on hover to show text labels + icons.
+ * Supports configurable sections and icons per theme.
+ * All themes start with the Dela logo (RS_DelaDefault.svg / RS_Dela_Active.svg) as the first icon.
+ *
+ * @prop {string} variant - Theme variant: 'cp' | 'vp' | 'ppm' | 'maconomy'
+ * @prop {Array} sections - Optional custom sections configuration
+ * @prop {string} class - Additional CSS classes to apply
+ *
+ * @usagePattern theme-variant-icons Each theme variant (cp, vp, ppm, maconomy) has its own predefined icon set. All themes start with Dela custom logo (RS_DelaDefault.svg default, RS_Dela_Active.svg active) as the first item. CP has 3 sections with 3, 2, and 4 items (lines 42-64). VP, PPM, and Maconomy have 3 sections with 8, 3, and 3 items respectively (currently identical configurations). The appropriate variant is shown via CSS based on html theme class (lines 369-393).
+ * @usagePattern custom-icon-support Navigation items support two icon approaches: standard Icon component (icon: 'icon-name') or custom images (isCustom: true, customSrc: '/path/to/image.svg', optional customSrcActive for active state) like the Dela logo (RS_DelaDefault.svg / RS_Dela_Active.svg). Custom images are rendered as <img> tags with class right-sidebar__dela-logo, while standard icons use the Icon component. All theme variants automatically include the Dela AI custom logo as the first item.
+ * @usagePattern panel-data-attributes Items use data attributes to control ShellPanel behavior: panelTitle (defaults to label), panelIcon (defaults to item icon), panelContentId (optional identifier), and useGradientHeader (boolean). The script automatically detects Dela AI items (by title or .right-sidebar__dela-logo) and applies gradient header without explicit useGradientHeader attribute (lines 423-428).
+ */
+import Icon from './Icon.astro';
+import Tooltip from './Tooltip.astro';
+
+interface NavItem {
+  icon?: string;
+  label: string;
+  href?: string;
+  isCustom?: boolean; // For Dela/custom logo
+  customSrc?: string; // Path to custom icon (default state)
+  customSrcActive?: string; // Path to custom icon when item is active (e.g. RS_Dela_Active.svg)
+  panelTitle?: string; // Panel title when item is clicked (defaults to label)
+  panelIcon?: string; // Panel icon when item is clicked (defaults to item icon)
+  panelContentId?: string; // Content identifier for contextual content
+  useGradientHeader?: boolean; // Apply gradient header background when this item's panel is open
+}
+
+interface Section {
+  items: NavItem[];
+}
+
+interface Props {
+  variant?: 'cp' | 'vp' | 'ppm' | 'maconomy';
+  sections?: Section[];
+  class?: string;
+}
+
+const { variant = 'cp', sections, class: className = '' } = Astro.props;
+
+// Icon names in default sections below resolve per theme-scoped icon manifest (src/data/icon-manifest.json): hero | tabler | custom; custom includes path and optional svg.
+// Default CP configuration (3 sections)
+const cpSections: Section[] = [
+  {
+    items: [
+      { label: 'Dela AI', isCustom: true, customSrc: '/RS_DelaDefault.svg', customSrcActive: '/RS_Dela_Active.svg' },
+      { icon: 'bell', label: 'Notifications' },
+      { icon: 'arrow-up-tray', label: 'Files' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'printer', label: 'Print' },
+      { icon: 'view-columns', label: 'Layout Options' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'mic-slash', label: 'Microphone' },
+      { icon: 'signal-slash', label: 'Offline' },
+      { icon: 'command-line', label: 'Keyboard Shortcuts' },
+      { icon: 'question-mark-circle', label: 'Help' },
+    ],
+  },
+];
+
+// Default PPM configuration (3 sections) - ALL start with Dela logo (RS_DelaDefault / RS_Dela_Active)
+const ppmSections: Section[] = [
+  {
+    items: [
+      { label: 'Dela AI', isCustom: true, customSrc: '/RS_DelaDefault.svg', customSrcActive: '/RS_Dela_Active.svg' },
+      { icon: 'pencil-square', label: 'Edit' },
+      { icon: 'magnifying-glass', label: 'Search' },
+      { icon: 'ellipsis-horizontal-circle', label: 'Actions' },
+      { icon: 'related', label: 'Related' },
+      { icon: 'template', label: 'Templates' },
+      { icon: 'cloud-arrow-up', label: 'Upload' },
+      { icon: 'cloud-arrow-down', label: 'Download' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'bell', label: 'Notifications' },
+      { icon: 'question-mark-circle', label: 'Help' },
+      { icon: 'share', label: 'Share' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'globe-alt', label: 'Accessibility' },
+      { icon: 'language', label: 'Language' },
+      { icon: 'moon', label: 'Dark Mode' },
+    ],
+  },
+];
+
+// Default VP configuration (3 sections - same as PPM for now)
+const vpSections: Section[] = [
+  {
+    items: [
+      { label: 'Dela AI', isCustom: true, customSrc: '/RS_DelaDefault.svg', customSrcActive: '/RS_Dela_Active.svg' },
+      { icon: 'pencil-square', label: 'Edit' },
+      { icon: 'magnifying-glass', label: 'Search' },
+      { icon: 'ellipsis-horizontal-circle', label: 'Actions' },
+      { icon: 'related', label: 'Related' },
+      { icon: 'template', label: 'Templates' },
+      { icon: 'cloud-arrow-up', label: 'Upload' },
+      { icon: 'cloud-arrow-down', label: 'Download' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'bell', label: 'Notifications' },
+      { icon: 'question-mark-circle', label: 'Help' },
+      { icon: 'share', label: 'Share' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'globe-alt', label: 'Accessibility' },
+      { icon: 'language', label: 'Language' },
+      { icon: 'moon', label: 'Dark Mode' },
+    ],
+  },
+];
+
+// Default Maconomy configuration (3 sections - same as PPM for now)
+const maconomySections: Section[] = [
+  {
+    items: [
+      { label: 'Dela AI', isCustom: true, customSrc: '/RS_DelaDefault.svg', customSrcActive: '/RS_Dela_Active.svg' },
+      { icon: 'pencil-square', label: 'Edit' },
+      { icon: 'magnifying-glass', label: 'Search' },
+      { icon: 'ellipsis-horizontal-circle', label: 'Actions' },
+      { icon: 'related', label: 'Related' },
+      { icon: 'template', label: 'Templates' },
+      { icon: 'cloud-arrow-up', label: 'Upload' },
+      { icon: 'cloud-arrow-down', label: 'Download' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'bell', label: 'Notifications' },
+      { icon: 'question-mark-circle', label: 'Help' },
+      { icon: 'share', label: 'Share' },
+    ],
+  },
+  {
+    items: [
+      { icon: 'globe-alt', label: 'Accessibility' },
+      { icon: 'language', label: 'Language' },
+      { icon: 'moon', label: 'Dark Mode' },
+    ],
+  },
+];
+
+// Get sections based on variant or use provided sections
+const getSections = (): Section[] => {
+  if (sections) return sections;
+  
+  switch (variant) {
+    case 'cp':
+      return cpSections;
+    case 'ppm':
+      return ppmSections;
+    case 'vp':
+      return vpSections;
+    case 'maconomy':
+      return maconomySections;
+    default:
+      return cpSections;
+  }
+};
+
+const sidebarSections = getSections();
+
+// If custom sections are provided, only render those
+// Otherwise, render all variants and use CSS to show/hide based on theme
+const shouldRenderAllVariants = !sections;
+---
+
+<nav class:list={['right-sidebar', `right-sidebar--${variant}`, className]} data-variant={variant}>
+  {shouldRenderAllVariants ? (
+    <>
+      <!-- CP Variant (3 sections) -->
+      <div class="right-sidebar__variant right-sidebar__variant--cp">
+        {cpSections.map((section, sectionIndex) => (
+          <div class="right-sidebar__section">
+            {section.items.map((item) => {
+              const panelTitle = item.panelTitle || item.label;
+              const panelIcon = item.panelIcon || item.icon;
+              const itemId = `right-sidebar-item-${sectionIndex}-${section.items.indexOf(item)}`;
+              
+              return (
+                <a 
+                  href={item.href || '#'} 
+                  class="right-sidebar__item"
+                  data-panel-title={panelTitle}
+                  data-panel-icon={panelIcon}
+                  data-panel-content-id={item.panelContentId}
+                  data-item-id={itemId}
+                  data-use-gradient-header={item.useGradientHeader || false}
+                  data-right-sidebar-item
+                >
+                  <span class="right-sidebar__label">{item.label}</span>
+                  <Tooltip text={item.label} position="left" class="right-sidebar__item-tooltip">
+                    <span class="right-sidebar__icon">
+                      {item.isCustom && item.customSrc ? (
+                        item.customSrcActive ? (
+                          <>
+                            <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--default" />
+                            <img src={item.customSrcActive} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--active" />
+                          </>
+                        ) : (
+                          <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo" />
+                        )
+                      ) : item.icon ? (
+                        <Icon name={item.icon} />
+                      ) : null}
+                    </span>
+                  </Tooltip>
+                </a>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      <!-- VP Variant (3 sections) -->
+      <div class="right-sidebar__variant right-sidebar__variant--vp">
+        {vpSections.map((section, sectionIndex) => (
+          <div class="right-sidebar__section">
+            {section.items.map((item) => {
+              const panelTitle = item.panelTitle || item.label;
+              const panelIcon = item.panelIcon || item.icon;
+              const itemId = `right-sidebar-item-${sectionIndex}-${section.items.indexOf(item)}`;
+              
+              return (
+                <a 
+                  href={item.href || '#'} 
+                  class="right-sidebar__item"
+                  data-panel-title={panelTitle}
+                  data-panel-icon={panelIcon}
+                  data-panel-content-id={item.panelContentId}
+                  data-item-id={itemId}
+                  data-use-gradient-header={item.useGradientHeader || false}
+                  data-right-sidebar-item
+                >
+                  <span class="right-sidebar__label">{item.label}</span>
+                  <Tooltip text={item.label} position="left" class="right-sidebar__item-tooltip">
+                    <span class="right-sidebar__icon">
+                      {item.isCustom && item.customSrc ? (
+                        item.customSrcActive ? (
+                          <>
+                            <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--default" />
+                            <img src={item.customSrcActive} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--active" />
+                          </>
+                        ) : (
+                          <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo" />
+                        )
+                      ) : item.icon ? (
+                        <Icon name={item.icon} />
+                      ) : null}
+                    </span>
+                  </Tooltip>
+                </a>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      <!-- PPM Variant (3 sections) -->
+      <div class="right-sidebar__variant right-sidebar__variant--ppm">
+        {ppmSections.map((section, sectionIndex) => (
+          <div class="right-sidebar__section">
+            {section.items.map((item) => {
+              const panelTitle = item.panelTitle || item.label;
+              const panelIcon = item.panelIcon || item.icon;
+              const itemId = `right-sidebar-item-${sectionIndex}-${section.items.indexOf(item)}`;
+              
+              return (
+                <a 
+                  href={item.href || '#'} 
+                  class="right-sidebar__item"
+                  data-panel-title={panelTitle}
+                  data-panel-icon={panelIcon}
+                  data-panel-content-id={item.panelContentId}
+                  data-item-id={itemId}
+                  data-use-gradient-header={item.useGradientHeader || false}
+                  data-right-sidebar-item
+                >
+                  <span class="right-sidebar__label">{item.label}</span>
+                  <Tooltip text={item.label} position="left" class="right-sidebar__item-tooltip">
+                    <span class="right-sidebar__icon">
+                      {item.isCustom && item.customSrc ? (
+                        item.customSrcActive ? (
+                          <>
+                            <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--default" />
+                            <img src={item.customSrcActive} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--active" />
+                          </>
+                        ) : (
+                          <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo" />
+                        )
+                      ) : item.icon ? (
+                        <Icon name={item.icon} />
+                      ) : null}
+                    </span>
+                  </Tooltip>
+                </a>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      <!-- Maconomy Variant (3 sections) -->
+      <div class="right-sidebar__variant right-sidebar__variant--maconomy">
+        {maconomySections.map((section, sectionIndex) => (
+          <div class="right-sidebar__section">
+            {section.items.map((item) => {
+              const panelTitle = item.panelTitle || item.label;
+              const panelIcon = item.panelIcon || item.icon;
+              const itemId = `right-sidebar-item-${sectionIndex}-${section.items.indexOf(item)}`;
+              
+              return (
+                <a 
+                  href={item.href || '#'} 
+                  class="right-sidebar__item"
+                  data-panel-title={panelTitle}
+                  data-panel-icon={panelIcon}
+                  data-panel-content-id={item.panelContentId}
+                  data-item-id={itemId}
+                  data-use-gradient-header={item.useGradientHeader || false}
+                  data-right-sidebar-item
+                >
+                  <span class="right-sidebar__label">{item.label}</span>
+                  <Tooltip text={item.label} position="left" class="right-sidebar__item-tooltip">
+                    <span class="right-sidebar__icon">
+                      {item.isCustom && item.customSrc ? (
+                        item.customSrcActive ? (
+                          <>
+                            <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--default" />
+                            <img src={item.customSrcActive} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--active" />
+                          </>
+                        ) : (
+                          <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo" />
+                        )
+                      ) : item.icon ? (
+                        <Icon name={item.icon} />
+                      ) : null}
+                    </span>
+                  </Tooltip>
+                </a>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </>
+  ) : (
+    // Custom sections provided - render only those
+    sidebarSections.map((section, sectionIndex) => (
+      <div class="right-sidebar__section">
+        {section.items.map((item) => {
+          const panelTitle = item.panelTitle || item.label;
+          const panelIcon = item.panelIcon || item.icon;
+          const itemId = `right-sidebar-item-${sectionIndex}-${section.items.indexOf(item)}`;
+          
+          return (
+            <a 
+              href={item.href || '#'} 
+              class="right-sidebar__item"
+              data-panel-title={panelTitle}
+              data-panel-icon={panelIcon}
+              data-panel-content-id={item.panelContentId}
+              data-item-id={itemId}
+              data-right-sidebar-item
+            >
+              <span class="right-sidebar__label">{item.label}</span>
+              <Tooltip text={item.label} position="left" class="right-sidebar__item-tooltip">
+                <span class="right-sidebar__icon">
+                  {item.isCustom && item.customSrc ? (
+                    item.customSrcActive ? (
+                      <>
+                        <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--default" />
+                        <img src={item.customSrcActive} alt={item.label} class="right-sidebar__dela-logo right-sidebar__dela-logo--active" />
+                      </>
+                    ) : (
+                      <img src={item.customSrc} alt={item.label} class="right-sidebar__dela-logo" />
+                    )
+                  ) : item.icon ? (
+                    <Icon name={item.icon} />
+                  ) : null}
+                </span>
+              </Tooltip>
+            </a>
+          );
+        })}
+      </div>
+    ))
+  )}
+</nav>
+
+<style>
+  /* Hide all variants by default */
+  .right-sidebar__variant {
+    display: none;
+  }
+
+  /* Show CP variant when CP theme is active */
+  html.theme-cp .right-sidebar__variant--cp {
+    display: contents;
+  }
+
+  /* Show VP variant when VP theme is active */
+  html.theme-vp .right-sidebar__variant--vp {
+    display: contents;
+  }
+
+  /* Show PPM variant when PPM theme is active */
+  html.theme-ppm .right-sidebar__variant--ppm {
+    display: contents;
+  }
+
+  /* Show Maconomy variant when Maconomy theme is active */
+  html.theme-maconomy .right-sidebar__variant--maconomy {
+    display: contents;
+  }
+</style>
+
+<script>
+  // Right sidebar panel functionality
+  (function() {
+    function initRightSidebarPanel() {
+      const rightSidebar = document.querySelector('.right-sidebar') as HTMLElement | null;
+      if (!rightSidebar) return;
+
+      const panelItems = rightSidebar.querySelectorAll('[data-right-sidebar-item]');
+      const rightPanel = document.querySelector('.shell-panel--right') as HTMLElement | null;
+
+      // Handle item clicks
+      panelItems.forEach((item) => {
+        const link = item as HTMLAnchorElement;
+        
+        link.addEventListener('click', (e) => {
+          // Only handle if item has panel configuration
+          if (!link.dataset.panelTitle) {
+            return; // Let default link behavior happen
+          }
+
+          e.preventDefault();
+
+          const title = link.dataset.panelTitle || '';
+          const icon = link.dataset.panelIcon || '';
+          const contentId = link.dataset.panelContentId;
+          const useGradientHeader = link.dataset.useGradientHeader === 'true';
+          
+          // Check if this is Dela AI item (automatic detection)
+          const isDelaAI = title === 'Dela AI' || 
+            (link.querySelector('.right-sidebar__dela-logo') !== null);
+          
+          // Determine if gradient should be applied
+          const shouldUseGradient = useGradientHeader || isDelaAI;
+
+          // Update panel dynamically
+          if (rightPanel) {
+            const isDelaPanel = rightPanel.getAttribute('data-dela-panel') === 'true';
+            const preserveDelaLayout = isDelaPanel && (isDelaAI || shouldUseGradient);
+
+            // Get panel header
+            const panelHeader = rightPanel.querySelector('.shell-panel__header') as HTMLElement | null;
+
+            // Set or clear gradient header attribute
+            if (panelHeader) {
+              if (shouldUseGradient) {
+                panelHeader.setAttribute('data-gradient-header', 'true');
+              } else {
+                panelHeader.removeAttribute('data-gradient-header');
+              }
+            }
+            // Update title
+            const titleElement = rightPanel.querySelector('.shell-panel__title') as HTMLElement | null;
+            if (titleElement) {
+              titleElement.textContent = title;
+            }
+
+            // For Dela panel opened from Dela AI item: only gradient and title were set above; do not replace icon or content
+            if (!preserveDelaLayout) {
+              // Update icon - find the icon container and update the icon
+              const iconContainer = rightPanel.querySelector('[data-panel-icon-container]') as HTMLElement | null;
+              if (iconContainer) {
+                // Find existing icon SVG or Icon element
+                const existingIcon = iconContainer.querySelector('svg, [data-panel-icon]');
+                if (existingIcon) {
+                  existingIcon.remove();
+                }
+
+                // Try to find and clone icon from the clicked item
+                const sourceIcon = link.querySelector('.right-sidebar__icon svg, .right-sidebar__icon img') as HTMLElement | null;
+                if (sourceIcon) {
+                  const clonedIcon = sourceIcon.cloneNode(true) as HTMLElement;
+                  // Ensure proper sizing for panel header
+                  if (clonedIcon.tagName === 'SVG') {
+                    clonedIcon.setAttribute('width', '20');
+                    clonedIcon.setAttribute('height', '20');
+                  }
+                  clonedIcon.setAttribute('data-panel-icon', icon || '');
+                  iconContainer.appendChild(clonedIcon);
+                  // Show the icon container
+                  iconContainer.style.display = 'flex';
+                } else if (icon) {
+                  // If no source icon found but we have an icon name, set data attribute
+                  iconContainer.setAttribute('data-icon-name', icon);
+                  iconContainer.style.display = 'flex';
+                } else {
+                  // Hide icon container if no icon
+                  iconContainer.style.display = 'none';
+                }
+              }
+
+              // Update content if needed
+              if (contentId) {
+                rightPanel.setAttribute('data-panel-content-id', contentId);
+              }
+
+              // Add default demo content if content area is empty
+              const contentArea = rightPanel.querySelector('.shell-panel__content') as HTMLElement | null;
+              if (contentArea && !contentArea.hasChildNodes()) {
+                contentArea.innerHTML = `
+                <div style="padding: var(--space-4);">
+                  <p style="color: var(--text-secondary); margin-bottom: var(--space-4);">
+                    Panel content for: <strong>${title}</strong>
+                  </p>
+                  <p style="color: var(--text-secondary); font-size: var(--text-sm);">
+                    This is contextual content that would be specific to the "${title}" menu item.
+                    In a real application, this content would be dynamically loaded based on the selected item.
+                  </p>
+                </div>
+              `;
+              }
+            }
+
+            // Open panel
+            rightPanel.classList.add('shell-panel--open');
+            rightPanel.setAttribute('data-open', 'true');
+
+            // Set sidebar state
+            rightSidebar.setAttribute('data-panel-open', 'true');
+
+            // Set active item
+            panelItems.forEach((i) => i.removeAttribute('data-active'));
+            link.setAttribute('data-active', 'true');
+          }
+        });
+      });
+
+      // Handle panel close - listen for close events
+      const closeButtons = document.querySelectorAll('[data-panel-close]');
+      closeButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const panel = btn.closest('.shell-panel--right') as HTMLElement | null;
+          if (panel && panel.classList.contains('shell-panel--open')) {
+            // Close panel
+            panel.classList.remove('shell-panel--open');
+            panel.setAttribute('data-open', 'false');
+
+            // Clear gradient header attribute
+            const panelHeader = panel.querySelector('.shell-panel__header') as HTMLElement | null;
+            if (panelHeader) {
+              panelHeader.removeAttribute('data-gradient-header');
+            }
+
+            // Clear sidebar state
+            rightSidebar.removeAttribute('data-panel-open');
+
+            // Clear active item
+            panelItems.forEach((i) => i.removeAttribute('data-active'));
+          }
+        });
+      });
+    }
+
+    initRightSidebarPanel();
+    document.addEventListener('astro:page-load', initRightSidebarPanel);
+  })();
+</script>

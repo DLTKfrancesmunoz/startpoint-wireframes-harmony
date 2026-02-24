@@ -1,0 +1,53 @@
+---
+/**
+ * ListMenu Component
+ *
+ * Vertical list menu for navigation or selection.
+ * Displays a list of interactive items with optional icons.
+ *
+ * @prop {MenuItem[]} items - Array of menu items
+ * @prop {string} as - Element type: 'button' or 'link' (default: 'button')
+ * @prop {string} variant - Variant style: 'default' or 'no-borders' (default: 'default')
+ * @prop {string} class - Additional CSS classes
+ */
+import Icon from './Icon.astro';
+
+export interface MenuItem {
+  icon?: string; // Heroicon name
+  label: string;
+  href?: string;
+  active?: boolean;
+  isCustom?: boolean; // Custom image URL instead of Icon name
+  customSrc?: string; // Path to custom icon image
+}
+
+export interface Props {
+  items: MenuItem[];
+  as?: 'button' | 'link';
+  variant?: 'default' | 'no-borders';
+  class?: string;
+}
+
+const { items, as = 'button', variant = 'default', class: className = '' } = Astro.props;
+---
+
+<div class:list={['list-menu', variant === 'no-borders' && 'list-menu--no-borders', className]}>
+  {items.map((item) => {
+    const Element = as === 'link' ? 'a' : 'button';
+    const itemProps = as === 'link' ? { href: item.href || '#' } : { type: 'button' };
+
+    return (
+      <Element
+        {...itemProps}
+        class:list={['list-menu__item', item.active && 'is-active']}
+      >
+        {item.isCustom && item.customSrc ? (
+          <img src={item.customSrc} alt={item.label} class="list-menu__item-icon list-menu__custom-icon" />
+        ) : item.icon ? (
+          <Icon name={item.icon} size="md" class="list-menu__item-icon" />
+        ) : null}
+        {item.label}
+      </Element>
+    );
+  })}
+</div>

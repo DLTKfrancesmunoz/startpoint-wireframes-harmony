@@ -1,0 +1,36 @@
+/* Card – from components.css (no <style> in Card.astro) */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.card--elevated { box-shadow: var(--shadow-lg); }
+.card--interactive { cursor: pointer; transition: all var(--transition-fast); }
+.card--interactive:hover { border-color: var(--theme-primary); box-shadow: var(--shadow-lg); }
+.card--primary { border-top: var(--space-1) solid var(--theme-primary); }
+.card__header { padding: var(--space-4); border-bottom: 1px solid var(--border-color); }
+.card__header-content { display: flex; flex-direction: column; gap: var(--space-1); flex: 1; }
+.card__header-title {
+  font-family: var(--font-display);
+  font-size: var(--heading-s);
+  font-weight: var(--font-semibold);
+  line-height: var(--space-6);
+  color: var(--text-primary);
+  margin: 0;
+}
+.card__header-subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--label);
+  line-height: var(--space-5);
+  color: var(--text-secondary);
+  margin: 0;
+}
+.card__header-actions { display: flex; align-items: center; gap: var(--space-2); }
+.card__body { padding: var(--space-4); }
+.card__footer {
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--elevated-bg);
+}

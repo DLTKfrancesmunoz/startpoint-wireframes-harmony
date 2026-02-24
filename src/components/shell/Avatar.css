@@ -1,0 +1,24 @@
+/* Avatar – from Harmony components.css */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-08);
+  background-color: var(--theme-primary);
+  flex-shrink: 0;
+}
+.avatar--sm {
+  width: var(--avatar-size-sm);
+  height: var(--avatar-size-sm);
+}
+.avatar--md {
+  width: var(--avatar-size-md);
+  height: var(--avatar-size-md);
+}
+.avatar--lg {
+  width: var(--avatar-size-lg);
+  height: var(--avatar-size-lg);
+}
+.avatar__icon {
+  color: white;
+}

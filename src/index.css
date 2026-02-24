@@ -1,0 +1,16 @@
+/* Harmony CSS order: reset → tokens → global → components → layout */
+@import '@deltek/harmony-components/styles/reset.css';
+@import '@deltek/harmony-components/styles/tokens.css';
+@import '@deltek/harmony-components/styles/global.css';
+@import '@deltek/harmony-components/styles/components.css';
+@import '@deltek/harmony-components/styles/layout.css';
+
+/* Host app: no root/body constraints so shell fills viewport */
+#root {
+  min-height: 100vh;
+  min-width: 100%;
+}
+
+html.theme-vp.dark {
+  /* VP dark applied for shell variant */
+}

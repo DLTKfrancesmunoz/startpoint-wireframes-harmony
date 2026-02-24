@@ -1,0 +1,135 @@
+---
+/**
+ * Button Component
+ *
+ * Interactive button with multiple variants, sizes, and states.
+ * Default slot: consumer-provided content (label/text). No fallback; consumer must pass content for a meaningful default state.
+ *
+ * @usagePattern icon-only-detection When an icon prop is provided but no text content is passed to the default slot and loading is false, the button automatically switches to icon-only mode using btn--icon-{size} classes instead of btn--{size} classes. This ensures proper square dimensions and centering for icon-only buttons.
+ * @usagePattern loading-state-behavior When loading is true, the button displays a spinner and optional loadingText, completely replacing any icon and default slot content. The button is automatically disabled (disabled || loading) to prevent multiple submissions. Set loadingText prop to show text alongside the spinner during loading.
+ * @usagePattern icon-size-mapping Button sizes (xs, sm, md, lg) map to icon sizes using iconSizeMap: xs→xs(12px), sm→sm(16px), md→sm(16px), lg→md(20px). The Icon component automatically receives the appropriate size prop based on the button size, ensuring visual consistency without manual size specification.
+ * @usagePattern href-button-element When href prop is provided, the component renders an <a> tag instead of <button> tag, maintaining identical visual styling and behavior. This allows buttons to function as navigation links while preserving semantics. The type prop is ignored when href is set, as <a> tags don't have a type attribute.
+ */
+import Icon from './Icon.astro';
+
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'destructive' | 'dela' | 'dela-pill';
+  buttonType?: 'theme' | 'pageHeader';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+  orientation?: 'horizontal' | 'vertical';
+  disabled?: boolean;
+  loading?: boolean;
+  loadingText?: string;
+  icon?: string; // Heroicon name (e.g., "plus", "arrow-right")
+  iconPosition?: 'left' | 'right';
+  type?: 'button' | 'submit' | 'reset';
+  fullWidth?: boolean;
+  href?: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  variant = 'primary',
+  buttonType = 'theme',
+  size = 'md',
+  orientation = 'horizontal',
+  disabled = false,
+  loading = false,
+  loadingText,
+  icon,
+  iconPosition = 'left',
+  type = 'button',
+  fullWidth = false,
+  href,
+  class: className = '',
+  ...rest
+} = Astro.props;
+
+// Map button size to icon size
+const iconSizeMap = {
+  xs: 'xs', // 12px
+  sm: 'sm', // 16px
+  md: 'sm', // 16px
+  lg: 'md', // 20px
+} as const;
+const iconSize = iconSizeMap[size];
+
+// Check if there's slot content (text)
+const hasSlotContent = Astro.slots.has('default');
+const isIconOnly = icon && !hasSlotContent && !loading;
+
+const isDelaVariant = variant === 'dela' || variant === 'dela-pill';
+
+// Build class list (do not apply page-header for Dela variants)
+const classes = [
+  'btn',
+  `btn--${variant}`,
+  buttonType === 'pageHeader' && !isDelaVariant && 'btn--page-header',
+  isIconOnly ? `btn--icon-${size}` : `btn--${size}`,
+  orientation === 'vertical' && 'btn--vertical',
+  disabled && 'btn--disabled',
+  loading && 'btn--loading',
+  fullWidth && 'btn--full',
+  className,
+].filter(Boolean).join(' ');
+---
+
+{href ? (
+  <a
+    href={href}
+    class={classes}
+    aria-busy={loading ? 'true' : undefined}
+    {...rest}
+  >
+    {loading ? (
+      <>
+        <svg class="btn__spinner" width="var(--btn-spinner-size)" height="var(--btn-spinner-size)" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="var(--btn-spinner-stroke-width)"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        {loadingText && <span>{loadingText}</span>}
+      </>
+    ) : (
+      <>
+        {isDelaVariant && <img src="/Stars.svg" alt="" class="btn__dela-stars" />}
+        {icon && iconPosition === 'left' && (
+          <Icon name={icon} size={iconSize} />
+        )}
+        <slot />
+        {icon && iconPosition === 'right' && (
+          <Icon name={icon} size={iconSize} />
+        )}
+      </>
+    )}
+  </a>
+) : (
+  <button
+    type={type}
+    class={classes}
+    disabled={disabled || loading}
+    aria-busy={loading ? 'true' : undefined}
+    {...rest}
+  >
+    {loading ? (
+      <>
+        <svg class="btn__spinner" width="var(--btn-spinner-size)" height="var(--btn-spinner-size)" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="var(--btn-spinner-stroke-width)"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        {loadingText && <span>{loadingText}</span>}
+      </>
+    ) : (
+      <>
+        {isDelaVariant && <img src="/Stars.svg" alt="" class="btn__dela-stars" />}
+        {icon && iconPosition === 'left' && (
+          <Icon name={icon} size={iconSize} />
+        )}
+        <slot />
+        {icon && iconPosition === 'right' && (
+          <Icon name={icon} size={iconSize} />
+        )}
+      </>
+    )}
+  </button>
+)}

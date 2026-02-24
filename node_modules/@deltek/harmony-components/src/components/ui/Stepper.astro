@@ -1,0 +1,154 @@
+---
+/**
+ * Stepper Component
+ *
+ * Displays progress through a sequence of logical and numbered steps.
+ * Default slot: consumer-provided Step children. No fallback; consumer must pass Step components for a meaningful default state.
+ * Supports horizontal and vertical orientation, linear and non-linear modes.
+ *
+ * @usagePattern state-indicator-priority Step components display state through props in priority order: error (highest) > warning > success > completed > default number display (lowest). When multiple state props are true, only the highest priority indicator icon is shown. Custom icon prop overrides all state indicators. This priority is implemented in lines 60-71 of Step.astro with conditional icon rendering.
+ * @usagePattern linear-vs-nonlinear-mode When nonLinear prop is false (default linear mode), the script automatically disables future steps beyond activeStep by adding is-disabled class and data-disabled attribute (lines 70-73). In nonLinear mode (nonLinear=true), all steps remain clickable unless explicitly disabled via step's disabled prop, and clicking dispatches 'stepper:step-clicked' custom event with stepIndex (lines 76-107).
+ * @usagePattern step-number-vs-icon Individual Step components display either a sequential number (auto-generated, lines 110-113) or a custom icon (if icon prop provided, lines 54-55). When error/warning/success/completed props are set without custom icon, the appropriate state icon replaces the number. The step number is calculated from the step's index position within the Stepper (line 112: index + 1).
+ * @usagePattern connector-line-state Connector lines between steps (step__connector) receive is-active class when the current step is completed, or when the next step is active or completed (lines 116-132). This creates visual continuity showing progress through the stepper sequence. In vertical orientation, connectors appear below each step; in horizontal, they appear to the right.
+ */
+export interface Props {
+  activeStep?: number;
+  orientation?: 'horizontal' | 'vertical';
+  nonLinear?: boolean;
+  class?: string;
+}
+
+const {
+  activeStep = 0,
+  orientation = 'horizontal',
+  nonLinear = false,
+  class: className = '',
+} = Astro.props;
+
+const stepperId = `stepper-${Math.random().toString(36).substr(2, 9)}`;
+const classes = [
+  'stepper',
+  `stepper--${orientation}`,
+  nonLinear && 'stepper--non-linear',
+  className,
+].filter(Boolean).join(' ');
+---
+
+<div
+  class={classes}
+  role="group"
+  aria-label="Stepper"
+  data-stepper
+  data-active-step={activeStep}
+  data-non-linear={nonLinear}
+  id={stepperId}
+>
+  <slot />
+</div>
+
+<script>
+  function initStepper(container: HTMLElement) {
+    if (container.hasAttribute('data-init')) return;
+    container.setAttribute('data-init', 'true');
+
+    const activeStep = parseInt(container.getAttribute('data-active-step') || '0');
+    const nonLinear = container.hasAttribute('data-non-linear');
+    const steps = Array.from(container.querySelectorAll('[data-step]')) as HTMLElement[];
+
+    steps.forEach((step, index) => {
+      const isActive = index === activeStep;
+      const isCompleted = step.hasAttribute('data-completed') && step.getAttribute('data-completed') === 'true';
+      const isDisabled = step.hasAttribute('data-disabled') && step.getAttribute('data-disabled') === 'true';
+      const isError = step.hasAttribute('data-error') && step.getAttribute('data-error') === 'true';
+      const isWarning = step.hasAttribute('data-warning') && step.getAttribute('data-warning') === 'true';
+      const isSuccess = step.hasAttribute('data-success') && step.getAttribute('data-success') === 'true';
+
+      // Update step state classes
+      step.classList.remove('is-active', 'is-completed', 'is-disabled', 'is-error', 'is-warning', 'is-success');
+      if (isActive) step.classList.add('is-active');
+      if (isCompleted) step.classList.add('is-completed');
+      if (isDisabled) step.classList.add('is-disabled');
+      if (isError) step.classList.add('is-error');
+      if (isWarning) step.classList.add('is-warning');
+      if (isSuccess) step.classList.add('is-success');
+
+      // In linear mode, disable future steps
+      if (!nonLinear && index > activeStep && !isCompleted) {
+        step.classList.add('is-disabled');
+        step.setAttribute('data-disabled', 'true');
+        step.setAttribute('tabindex', '-1');
+        step.removeAttribute('role');
+      } else if (nonLinear && !isDisabled && index > activeStep) {
+        // In non-linear mode, ensure future steps are enabled (unless explicitly disabled)
+        step.classList.remove('is-disabled');
+        step.removeAttribute('data-disabled');
+      }
+
+      // Set ARIA attributes
+      const stepLabel = step.querySelector('.step__label');
+      if (stepLabel) {
+        stepLabel.setAttribute('aria-current', isActive ? 'step' : 'false');
+      }
+
+      // Handle non-linear mode - make steps clickable
+      if (nonLinear && !isDisabled && !step.hasAttribute('data-click-handler')) {
+        step.setAttribute('tabindex', '0');
+        step.setAttribute('role', 'button');
+        step.setAttribute('aria-label', `Go to step ${index + 1}`);
+        step.setAttribute('data-click-handler', 'true');
+        
+        step.addEventListener('click', () => {
+          container.dispatchEvent(new CustomEvent('stepper:step-clicked', {
+            bubbles: true,
+            detail: { stepIndex: index }
+          }));
+        });
+
+        step.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            step.click();
+          }
+        });
+      }
+
+      // Update step number indicator
+      const stepNumber = step.querySelector('.step__number');
+      if (stepNumber && !step.querySelector('.step__icon')) {
+        stepNumber.textContent = (index + 1).toString();
+      }
+    });
+
+    // Update connector lines
+    steps.forEach((step, index) => {
+      if (index < steps.length - 1) {
+        const connector = step.querySelector('.step__connector') as HTMLElement;
+        if (connector) {
+          const nextStep = steps[index + 1];
+          const isNextCompleted = nextStep.hasAttribute('data-completed') && nextStep.getAttribute('data-completed') === 'true';
+          const isNextActive = index + 1 === activeStep;
+          const isCurrentCompleted = step.hasAttribute('data-completed') && step.getAttribute('data-completed') === 'true';
+          
+          connector.classList.remove('is-active');
+          if (isNextCompleted || isNextActive || isCurrentCompleted) {
+            connector.classList.add('is-active');
+          }
+        }
+      }
+    });
+  }
+
+  function initAllSteppers() {
+    document.querySelectorAll('[data-stepper]').forEach((container) => {
+      initStepper(container as HTMLElement);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAllSteppers);
+  } else {
+    initAllSteppers();
+  }
+
+  document.addEventListener('astro:page-load', initAllSteppers);
+</script>

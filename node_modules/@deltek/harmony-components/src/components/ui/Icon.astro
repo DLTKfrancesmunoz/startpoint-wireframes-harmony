@@ -1,0 +1,151 @@
+---
+/// <reference types="node" />
+/**
+ * Default icon resolution (source + path; for custom, optional svg) is defined in the theme-scoped
+ * icon manifest: src/data/icon-manifest.json. Converters must use that manifest for the target
+ * theme (cp, vp, ppm, maconomy); do not assume Heroicons for every icon.
+ */
+import fs from 'fs';
+import path from 'path';
+
+interface Props {
+  name: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  class?: string;
+  variant?: 'outline' | 'solid';
+}
+
+const { name, size = 'md', class: className = '', variant = 'outline' } = Astro.props;
+
+// Size mapping - matches CSS token values
+const sizeDimensions: Record<string, { width: number; height: number }> = {
+  xs: { width: 12, height: 12 }, // matches --icon-xs
+  sm: { width: 16, height: 16 }, // matches --icon-sm
+  md: { width: 20, height: 20 }, // matches --icon-md
+  lg: { width: 24, height: 24 }, // matches --icon-lg
+  xl: { width: 32, height: 32 }, // matches --icon-xl
+};
+
+// Resolution order: Heroicons (default) → Tabler (when Hero has no mapping or icon not in library) → public/{name}.svg
+// Tabler is used only when Hero doesn't resolve. Pin is the Tabler icon used in ShellFooter and FloatingNav.
+let svgContent = '';
+let isCustomIcon = false;
+let isFilledIcon = false;
+let isMixedCustomIcon = false; // custom icon with both fill and stroke paths (e.g. mic-slash) — outer svg must not add stroke
+let customViewBox = '0 0 24 24';
+let useComplexSvg = false;
+
+function tryHeroicons(): boolean {
+  try {
+    const heroiconsPath = path.join(process.cwd(), 'node_modules', 'heroicons', '24', variant, `${name}.svg`);
+    const svgFile = fs.readFileSync(heroiconsPath, 'utf-8');
+    const pathMatch = svgFile.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+    if (pathMatch) {
+      svgContent = pathMatch[1].trim();
+      return true;
+    }
+  } catch {
+    // Heroicon not found
+  }
+  return false;
+}
+
+function tryTabler(): boolean {
+  try {
+    const tablerVariant = variant === 'solid' ? 'filled' : 'outline';
+    const tablerPath = path.join(process.cwd(), 'node_modules', '@tabler', 'icons', 'icons', tablerVariant, `${name}.svg`);
+    const svgFile = fs.readFileSync(tablerPath, 'utf-8');
+    const pathMatch = svgFile.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+    if (pathMatch) {
+      svgContent = pathMatch[1].trim();
+      return true;
+    }
+  } catch {
+    // Tabler icon not found
+  }
+  return false;
+}
+
+function tryPublic(): boolean {
+  try {
+    const customPath = path.join(process.cwd(), 'public', `${name}.svg`);
+    const customSvg = fs.readFileSync(customPath, 'utf-8');
+
+    const viewBoxMatch = customSvg.match(/viewBox="([^"]*)"/);
+    if (viewBoxMatch) {
+      customViewBox = viewBoxMatch[1];
+    }
+
+    const pathMatch = customSvg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+    if (pathMatch) {
+      isCustomIcon = true;
+      const innerContent = pathMatch[1].trim();
+
+      const hasGradients = /(fill|stroke)="url\(#[^)]+\)"/.test(innerContent);
+      const isNonStandardViewBox = customViewBox !== '0 0 24 24';
+      useComplexSvg = hasGradients || isNonStandardViewBox;
+
+      if (useComplexSvg) {
+        svgContent = innerContent;
+      } else {
+        const hasFill = /fill="(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3})"/i.test(innerContent);
+        const hasStroke = /stroke="(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3})"/i.test(innerContent);
+        isFilledIcon = hasFill && !hasStroke;
+        isMixedCustomIcon = hasFill && hasStroke; // paths have both fill and stroke; don't add outer stroke
+
+        const defsMatch = innerContent.match(/(<defs>[\s\S]*?<\/defs>)/);
+        const defsContent = defsMatch ? defsMatch[1] : '';
+        const contentWithoutDefs = innerContent.replace(/(<defs>[\s\S]*?<\/defs>)/, '');
+
+        const processedContent = contentWithoutDefs
+          .replace(/stroke="(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3})"/gi, 'stroke="currentColor"')
+          .replace(/fill="(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3})"/gi, 'fill="currentColor"')
+          .trim();
+
+        svgContent = processedContent + (defsContent ? '\n' + defsContent : '');
+      }
+      return true;
+    }
+  } catch {
+    // Custom icon not found
+  }
+  return false;
+}
+
+if (tryHeroicons()) {
+  // resolved from Heroicons
+} else if (tryTabler()) {
+  // resolved from Tabler (used when Hero has no mapping or icon not in library)
+} else if (tryPublic()) {
+  // resolved from public/{name}.svg
+} else {
+  console.warn(`Icon "${name}" not found in heroicons, tabler, or custom icons`);
+}
+
+const dimensions = sizeDimensions[size] || sizeDimensions.md;
+---
+
+{svgContent ? (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill={useComplexSvg ? 'none' : (isFilledIcon ? 'currentColor' : 'none')}
+    viewBox={customViewBox}
+    stroke-width={useComplexSvg || isMixedCustomIcon ? undefined : (isFilledIcon ? undefined : '1.5')}
+    stroke={useComplexSvg ? undefined : (isFilledIcon || isMixedCustomIcon ? 'none' : 'currentColor')}
+    width={dimensions.width}
+    height={dimensions.height}
+    class={className}
+    style={useComplexSvg || isFilledIcon || isMixedCustomIcon ? undefined : `stroke-width: var(--icon-stroke-width);`}
+    aria-hidden="true"
+    data-icon={name}
+    set:html={svgContent}
+  />
+) : (
+  <span
+    style={`width: ${dimensions.width}px; height: ${dimensions.height}px; display: inline-flex; align-items: center; justify-content: center; background-color: var(--icon-fallback-bg); color: var(--icon-fallback-text); font-size: var(--icon-fallback-font-size); border-radius: var(--icon-fallback-radius);`}
+    class={className}
+    title={`Icon "${name}" not found`}
+  >
+    ?
+  </span>
+)}

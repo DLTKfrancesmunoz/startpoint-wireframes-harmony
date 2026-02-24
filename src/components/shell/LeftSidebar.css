@@ -1,0 +1,25 @@
+/* LeftSidebar – scoped variant visibility (from Astro <style>; also in components.css) */
+.left-sidebar__variant {
+  display: none;
+}
+html.theme-cp .left-sidebar__variant--cp,
+html.theme-cp.dark .left-sidebar__variant--cp {
+  display: contents;
+}
+html.theme-vp .left-sidebar__variant--vp,
+html.theme-vp.dark .left-sidebar__variant--vp {
+  display: contents;
+}
+html.theme-ppm .left-sidebar__variant--ppm,
+html.theme-ppm.dark .left-sidebar__variant--ppm {
+  display: contents;
+}
+html.theme-maconomy .left-sidebar__variant--maconomy,
+html.theme-maconomy.dark .left-sidebar__variant--maconomy {
+  display: contents;
+}
+
+/* Icons: <img> custom icons do not inherit color (pitfall); dark-mode filter */
+html.dark .left-sidebar__icon .left-sidebar__custom-icon {
+  filter: brightness(0) invert(1);
+}
