@@ -15,9 +15,29 @@ import {
   isClientRequiredBillingType,
   isConstructionCostBillingType,
 } from '../types/project';
-import { Alert } from './shell/Alert';
 import { Button } from './shell/Button';
 import './ProjectDetailView.css';
+
+/** Same AI icon as Create Project modal Dela banner (purple, Dela-branded). */
+const DelaBannerIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="project-detail__dela-banner-icon"
+    aria-hidden
+  >
+    <path d="M8 16v-6a2 2 0 1 1 4 0v6" />
+    <path d="M8 13h4" />
+    <path d="M16 8v8" />
+  </svg>
+);
 
 /** Status-based banner messages for the detail page (contextual implication + optional action). */
 const DETAIL_STATUS_BANNERS: Record<
@@ -168,9 +188,10 @@ export function ProjectDetailView({ project, onBack, onProjectUpdate }: ProjectD
       <Card primary elevated withHeader headerTitle="Overview" headerSubtitle="">
         {DETAIL_STATUS_BANNERS[edit.status] && (
           <div className="project-detail__status-banner-wrap">
-            <Alert variant="info" style="default" className="project-detail__status-banner">
-              {DETAIL_STATUS_BANNERS[edit.status].message}
-            </Alert>
+            <div className="project-detail__dela-banner" role="status">
+              <DelaBannerIcon />
+              <span>{DETAIL_STATUS_BANNERS[edit.status].message}</span>
+            </div>
             {DETAIL_STATUS_BANNERS[edit.status].actionLabel === 'Set to Active' &&
               onProjectUpdate && (
                 <Button

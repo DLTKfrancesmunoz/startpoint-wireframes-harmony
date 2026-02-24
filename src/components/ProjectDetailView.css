@@ -54,7 +54,7 @@
   border-bottom: none;
 }
 
-/* Status banner at top of Overview card */
+/* Status banner at top of Overview card – same purple as Create Project modal Dela banner */
 .project-detail__status-banner-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -62,7 +62,21 @@
   gap: var(--space-3);
   margin-bottom: var(--space-4);
 }
-.project-detail__status-banner {
+.project-detail__dela-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
   flex: 1;
   min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--dela-bubble-bg);
+  border: 1px solid var(--gradient-dela-start);
+  color: var(--gradient-dela-start);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+.project-detail__dela-banner-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
