@@ -4,7 +4,9 @@
  */
 
 import clsx from 'clsx';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Icon } from './Icon';
+import { SunIcon } from './SunIcon';
 import { Tooltip } from './Tooltip';
 import './RightSidebar.css';
 
@@ -160,13 +162,47 @@ function getSections(variant: RightSidebarVariant, sections?: RightSidebarSectio
   }
 }
 
-function renderSection(section: RightSidebarSection, sectionIndex: number) {
+const isThemeToggleItem = (item: RightSidebarNavItem) =>
+  item.icon === 'moon' && item.label === 'Dark Mode';
+
+function renderSection(
+  section: RightSidebarSection,
+  sectionIndex: number,
+  isDark: boolean,
+  onToggleTheme: () => void
+) {
   return (
     <div key={sectionIndex} className="right-sidebar__section">
       {section.items.map((item, itemIndex) => {
         const panelTitle = item.panelTitle ?? item.label;
         const panelIcon = item.panelIcon ?? item.icon;
         const itemId = `right-sidebar-item-${sectionIndex}-${itemIndex}`;
+        const isThemeToggle = isThemeToggleItem(item);
+
+        if (isThemeToggle) {
+          const label = isDark ? 'Light mode' : 'Dark mode';
+          const ariaLabel = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+          return (
+            <button
+              key={itemId}
+              type="button"
+              className="right-sidebar__item"
+              data-item-id={itemId}
+              data-right-sidebar-item
+              onClick={onToggleTheme}
+              aria-label={ariaLabel}
+              aria-pressed={isDark}
+            >
+              <span className="right-sidebar__label">{label}</span>
+              <Tooltip text={label} position="left" className="right-sidebar__item-tooltip">
+                <span className="right-sidebar__icon">
+                  {isDark ? <SunIcon size={20} /> : <Icon name="moon" />}
+                </span>
+              </Tooltip>
+            </button>
+          );
+        }
+
         return (
           <a
             key={itemId}
@@ -223,8 +259,12 @@ export function RightSidebar({
   sections,
   className = '',
 }: RightSidebarProps) {
+  const { isDark, toggleTheme } = useTheme();
   const sidebarSections = getSections(variant, sections);
   const shouldRenderAllVariants = sections == null;
+
+  const render = (section: RightSidebarSection, i: number) =>
+    renderSection(section, i, isDark, toggleTheme);
 
   return (
     <nav
@@ -234,20 +274,20 @@ export function RightSidebar({
       {shouldRenderAllVariants ? (
         <>
           <div className="right-sidebar__variant right-sidebar__variant--cp">
-            {cpSections.map((section, i) => renderSection(section, i))}
+            {cpSections.map((section, i) => render(section, i))}
           </div>
           <div className="right-sidebar__variant right-sidebar__variant--vp">
-            {vpSections.map((section, i) => renderSection(section, i))}
+            {vpSections.map((section, i) => render(section, i))}
           </div>
           <div className="right-sidebar__variant right-sidebar__variant--ppm">
-            {ppmSections.map((section, i) => renderSection(section, i))}
+            {ppmSections.map((section, i) => render(section, i))}
           </div>
           <div className="right-sidebar__variant right-sidebar__variant--maconomy">
-            {maconomySections.map((section, i) => renderSection(section, i))}
+            {maconomySections.map((section, i) => render(section, i))}
           </div>
         </>
       ) : (
-        sidebarSections.map((section, i) => renderSection(section, i))
+        sidebarSections.map((section, i) => render(section, i))
       )}
     </nav>
   );
