@@ -38,3 +38,21 @@
   outline: none;
   box-shadow: var(--focus-ring-primary);
 }
+
+/* Dela banner above Client – same purple as pill (AI-generated status message) */
+.create-project-modal__dela-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--dela-bubble-bg);
+  border: 1px solid var(--gradient-dela-start);
+  color: var(--gradient-dela-start);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+.create-project-modal__dela-banner .create-project-modal__dela-pill-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

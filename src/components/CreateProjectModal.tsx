@@ -67,6 +67,18 @@ const MOCK_USERS: DropdownOption[] = [
 const NO_RATE_TABLES_CONFIGURED = false;
 const EXISTING_PROJECT_IDS = ['PRJ-2025-001', 'PRJ-2025-002'];
 
+/** Dela-generated banner copy per status (shown above Client when a status is chosen). */
+const STATUS_BANNER_MESSAGES: Record<string, string> = {
+  Preliminary:
+    'Preliminary status means team members won\'t see this project in their timesheet until you activate it.',
+  Active:
+    'Active projects are visible for time entry and invoicing. For billable projects you\'ll need to select a Client and a Rate Table below.',
+  Hold: 'Time entry is blocked; invoicing is still allowed.',
+  'Work Hold': 'Time entry is blocked; invoicing is still allowed.',
+  'Billing Hold': 'Time entry is allowed; invoicing is blocked.',
+  Closed: 'Closed projects are read-only. No further time entry or invoicing.',
+};
+
 export interface CreateProjectForm {
   creationPath: CreationPath;
   templateId?: string;
@@ -337,6 +349,14 @@ export function CreateProjectModal({
           </div>
         </div>
       </div>
+
+      {/* Dela banner above Client (shown when a status is chosen) */}
+      {form.status && STATUS_BANNER_MESSAGES[form.status] && (
+        <div className="create-project-modal__dela-banner" style={formGroupStyle} role="status">
+          <AiIcon />
+          <span>{STATUS_BANNER_MESSAGES[form.status]}</span>
+        </div>
+      )}
 
       {/* Client (conditional) – full width */}
       {showClient && (

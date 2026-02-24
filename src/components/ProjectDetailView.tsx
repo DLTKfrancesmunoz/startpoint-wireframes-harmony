@@ -15,7 +15,33 @@ import {
   isClientRequiredBillingType,
   isConstructionCostBillingType,
 } from '../types/project';
+import { Alert } from './shell/Alert';
+import { Button } from './shell/Button';
 import './ProjectDetailView.css';
+
+/** Status-based banner messages for the detail page (contextual implication + optional action). */
+const DETAIL_STATUS_BANNERS: Record<
+  string,
+  { message: string; actionLabel?: string }
+> = {
+  Preliminary: {
+    message:
+      'This project is in Preliminary status. Team members won\'t see it in their timesheet until you set it to Active.',
+    actionLabel: 'Set to Active',
+  },
+  Hold: {
+    message: 'Time entry is blocked; invoicing is still allowed.',
+  },
+  'Work Hold': {
+    message: 'Time entry is blocked; invoicing is still allowed.',
+  },
+  'Billing Hold': {
+    message: 'Time entry is allowed; invoicing is blocked.',
+  },
+  Closed: {
+    message: 'Closed projects are read-only. No further time entry or invoicing.',
+  },
+};
 
 const MOCK_USERS: DropdownOption[] = [
   { value: 'u1', label: 'Pam Chen' },
@@ -140,6 +166,27 @@ export function ProjectDetailView({ project, onBack, onProjectUpdate }: ProjectD
 
       {/* Overview */}
       <Card primary elevated withHeader headerTitle="Overview" headerSubtitle="">
+        {DETAIL_STATUS_BANNERS[edit.status] && (
+          <div className="project-detail__status-banner-wrap">
+            <Alert variant="info" style="default" className="project-detail__status-banner">
+              {DETAIL_STATUS_BANNERS[edit.status].message}
+            </Alert>
+            {DETAIL_STATUS_BANNERS[edit.status].actionLabel === 'Set to Active' &&
+              onProjectUpdate && (
+                <Button
+                  buttonType="theme"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEdit((e) => ({ ...e, status: 'Active' }));
+                    setIsEditing(true);
+                  }}
+                >
+                  Set to Active
+                </Button>
+              )}
+          </div>
+        )}
         <div className="card__body project-detail__card-grid">
           {!isEditing ? (
             <>
