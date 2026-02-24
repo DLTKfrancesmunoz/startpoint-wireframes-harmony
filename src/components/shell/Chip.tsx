@@ -7,6 +7,15 @@ import type { ReactNode } from 'react';
 import { Icon } from './Icon';
 import clsx from 'clsx';
 
+/** Inline X icon for remove button (avoids dependency on icon manifest) */
+function ChipRemoveIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden width={16} height={16}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
 export interface ChipProps {
   label?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -86,7 +95,7 @@ export function Chip({
               aria-label="Remove"
               onClick={handleRemove}
             >
-              <Icon name="x-mark" size={iconSize} />
+              <ChipRemoveIcon />
             </button>
           )}
         </>

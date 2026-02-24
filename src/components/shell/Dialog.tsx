@@ -94,7 +94,7 @@ export function Dialog({
             aria-label="Close"
             onClick={onClose}
           >
-            <Icon name="x-mark" />
+            <CloseIcon />
           </button>
         </div>
         <div className="dialog__body">

@@ -7,8 +7,13 @@ import { useState } from 'react';
 import { ShellPageHeader } from './shell/ShellPageHeader';
 import { Card } from './shell/Card';
 import { CreateProjectModal } from './CreateProjectModal';
+import type { CreateProjectForm } from './CreateProjectModal';
 
-export function ProjectsView() {
+export interface ProjectsViewProps {
+  onProjectCreated?: (form: CreateProjectForm) => void;
+}
+
+export function ProjectsView({ onProjectCreated }: ProjectsViewProps) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   return (
@@ -35,8 +40,8 @@ export function ProjectsView() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onCreateProject={(form) => {
-          console.log('Create project (stub):', form);
           setCreateModalOpen(false);
+          onProjectCreated?.(form);
         }}
       />
     </>

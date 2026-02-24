@@ -13,4 +13,15 @@
 
 html.theme-vp.dark {
   /* VP dark applied for shell variant */
+  /* Page header primary button: background is #495057 (100% opacity); ensure text is white */
+  --page-header-btn-primary-fg: #ffffff;
+}
+
+/* Full-width dropdown (e.g. Client, Project Manager in Create Project modal) */
+.dropdown--full-width {
+  width: 100%;
+}
+.dropdown--full-width .dropdown__trigger {
+  width: 100%;
+  min-width: 0;
 }

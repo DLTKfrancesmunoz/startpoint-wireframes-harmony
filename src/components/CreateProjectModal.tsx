@@ -286,7 +286,7 @@ export function CreateProjectModal({
           />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
-          <div>
+          <div style={{ minWidth: 0, width: '100%' }}>
             <Input
               label="Project ID / Number"
               labelVariant="stacked"
@@ -298,29 +298,33 @@ export function CreateProjectModal({
               placeholder="Enter or auto-generated"
             />
           </div>
-          <div>
+          <div style={{ minWidth: 0, width: '100%' }}>
             <Dropdown
               label="Status"
               labelVariant="stacked"
               options={STATUS_OPTIONS}
               value={form.status}
               onChange={(value) => setForm((f) => ({ ...f, status: value }))}
+              className="dropdown--full-width"
             />
           </div>
         </div>
       </div>
 
-      {/* Client (conditional) */}
+      {/* Client (conditional) – full width */}
       {showClient && (
-        <div style={{ ...sectionGapStyle, ...formGroupStyle }}>
-          <Dropdown
-            label="Client"
-            labelVariant="stacked"
-            options={MOCK_CLIENTS}
-            value={form.clientId ?? ''}
-            placeholder="Select client"
-            onChange={(value) => setForm((f) => ({ ...f, clientId: value }))}
-          />
+        <div style={{ ...sectionGapStyle, ...formGroupStyle, width: '100%' }}>
+          <div style={{ width: '100%' }}>
+            <Dropdown
+              label="Client"
+              labelVariant="stacked"
+              options={MOCK_CLIENTS}
+              value={form.clientId ?? ''}
+              placeholder="Select client"
+              onChange={(value) => setForm((f) => ({ ...f, clientId: value }))}
+              className="dropdown--full-width"
+            />
+          </div>
           {errors.client && (
             <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-error)', marginTop: 'var(--space-1)' }}>
               {errors.client}
@@ -329,18 +333,21 @@ export function CreateProjectModal({
         </div>
       )}
 
-      {/* Project Manager(s) – multi-select with pills */}
-      <div style={sectionGapStyle}>
-        <div style={formGroupStyle}>
+      {/* Project Manager(s) – multi-select with pills, full width */}
+      <div style={{ ...sectionGapStyle, width: '100%' }}>
+        <div style={{ ...formGroupStyle, width: '100%' }}>
           <label className="label" style={{ display: 'block', marginBottom: 'var(--space-1-5)' }}>
             Project Manager(s)
           </label>
-          <Dropdown
-            placeholder="Add project manager"
-            options={MOCK_USERS.filter((u) => !form.projectManagerIds.includes(u.value))}
-            value=""
-            onChange={(value) => addProjectManager(value)}
-          />
+          <div style={{ width: '100%' }}>
+            <Dropdown
+              placeholder="Add project manager"
+              options={MOCK_USERS.filter((u) => !form.projectManagerIds.includes(u.value))}
+              value=""
+              onChange={(value) => addProjectManager(value)}
+              className="dropdown--full-width"
+            />
+          </div>
           {form.projectManagerIds.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)', marginTop: 'var(--space-2)' }}>
               {form.projectManagerIds.map((id) => {

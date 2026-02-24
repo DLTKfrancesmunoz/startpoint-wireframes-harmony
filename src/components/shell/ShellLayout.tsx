@@ -4,11 +4,14 @@
  * VP dark variant: footer with tabs, no floating nav, VP sidebars.
  */
 
+import { useState } from 'react';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
 import { ShellHeader } from './ShellHeader';
 import { ShellFooter, type Tab } from './ShellFooter';
 import { ProjectsView } from '../ProjectsView';
+import { ProjectDetailView } from '../ProjectDetailView';
+import type { CreateProjectForm } from '../CreateProjectModal';
 import './ShellLayout.css';
 
 const SAMPLE_TABS: Tab[] = [
@@ -24,6 +27,9 @@ export default function ShellLayout() {
   const isCPVariant = false; // VP variant
   const leftVariant = 'vp';
   const rightVariant = 'vp';
+
+  const [selectedProject, setSelectedProject] = useState<CreateProjectForm | null>(null);
+  const showDetail = selectedProject !== null;
 
   return (
     <div
@@ -51,7 +57,16 @@ export default function ShellLayout() {
         )}
 
         <main className="shell-layout__main">
-          <ProjectsView />
+          {showDetail && selectedProject ? (
+            <ProjectDetailView
+              project={selectedProject}
+              onBack={() => setSelectedProject(null)}
+            />
+          ) : (
+            <ProjectsView
+              onProjectCreated={(form) => setSelectedProject(form)}
+            />
+          )}
         </main>
 
         {effectiveHasFooter && (
