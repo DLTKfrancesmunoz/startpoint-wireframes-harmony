@@ -98,6 +98,14 @@ const DEFAULT_FORM: CreateProjectForm = {
 const formGroupStyle = { marginBottom: 'var(--space-4)' };
 const sectionGapStyle = { marginBottom: 'var(--space-6)' };
 
+const AiIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="create-project-modal__dela-pill-icon" aria-hidden>
+    <path d="M8 16v-6a2 2 0 1 1 4 0v6" />
+    <path d="M8 13h4" />
+    <path d="M16 8v8" />
+  </svg>
+);
+
 export function CreateProjectModal({
   open,
   onClose,
@@ -184,6 +192,7 @@ export function CreateProjectModal({
         <div
           role="button"
           tabIndex={0}
+          className="create-project-modal__option-box"
           onClick={() => setForm((f) => ({ ...f, creationPath: 'new' }))}
           onKeyDown={(e) => e.key === 'Enter' && setForm((f) => ({ ...f, creationPath: 'new' }))}
           style={{
@@ -204,12 +213,13 @@ export function CreateProjectModal({
           </p>
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
             <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>or</span>
-            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Use Dela</Link>
+            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}><AiIcon />Use Dela</Link>
           </div>
         </div>
         <div
           role="button"
           tabIndex={0}
+          className="create-project-modal__option-box"
           onClick={() => setForm((f) => ({ ...f, creationPath: 'copy' }))}
           onKeyDown={(e) => e.key === 'Enter' && setForm((f) => ({ ...f, creationPath: 'copy' }))}
           style={{
@@ -230,12 +240,13 @@ export function CreateProjectModal({
           </p>
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
             <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>or</span>
-            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Use Dela</Link>
+            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}><AiIcon />Use Dela</Link>
           </div>
         </div>
         <div
           role="button"
           tabIndex={0}
+          className="create-project-modal__option-box"
           onClick={() => setForm((f) => ({ ...f, creationPath: 'template' }))}
           onKeyDown={(e) => e.key === 'Enter' && setForm((f) => ({ ...f, creationPath: 'template' }))}
           style={{
@@ -256,7 +267,7 @@ export function CreateProjectModal({
           </p>
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
             <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>or</span>
-            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Use Dela</Link>
+            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}><AiIcon />Use Dela</Link>
           </div>
         </div>
       </div>
