@@ -4,7 +4,7 @@
  * VP dark variant: footer with tabs, no floating nav, VP sidebars.
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
 import { ShellHeader } from './ShellHeader';
@@ -13,6 +13,12 @@ import { ProjectsView } from '../ProjectsView';
 import { ProjectDetailView } from '../ProjectDetailView';
 import type { CreateProjectForm } from '../CreateProjectModal';
 import { projectFromCreateForm, type Project } from '../../types/project';
+import {
+  readProjectsFromStorage,
+  writeProjectsToStorage,
+  readSelectedProjectId,
+  writeSelectedProjectId,
+} from '../../utils/projectStorage';
 import './ShellLayout.css';
 
 const SAMPLE_TABS: Tab[] = [
@@ -29,9 +35,28 @@ export default function ShellLayout() {
   const leftVariant = 'vp';
   const rightVariant = 'vp';
 
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(readProjectsFromStorage);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const didRestoreSelection = useRef(false);
   const showDetail = selectedProject !== null;
+
+  // Restore selected project from storage once we have projects (e.g. after reload).
+  useEffect(() => {
+    if (didRestoreSelection.current) return;
+    didRestoreSelection.current = true;
+    const id = readSelectedProjectId();
+    if (!id || projects.length === 0) return;
+    const found = projects.find((p) => p.projectId === id);
+    if (found) setSelectedProject(found);
+  }, [projects]);
+
+  useEffect(() => {
+    writeProjectsToStorage(projects);
+  }, [projects]);
+
+  useEffect(() => {
+    writeSelectedProjectId(selectedProject?.projectId ?? null);
+  }, [selectedProject]);
 
   const handleProjectCreated = (form: CreateProjectForm) => {
     const p = projectFromCreateForm(form);

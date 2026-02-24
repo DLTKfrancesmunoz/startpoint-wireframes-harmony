@@ -1,4 +1,16 @@
 /* RightSidebar – scoped variant visibility + icon color pitfall (dark-mode img filters) */
+
+/* Theme toggle button: match link appearance */
+button.right-sidebar__item {
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: inherit;
+  width: 100%;
+}
+
 .right-sidebar__variant {
   display: none;
 }
