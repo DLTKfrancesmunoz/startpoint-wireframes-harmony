@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@deltek/harmony-components": "github:DLTKfrancesmunoz/harmonycomponents",
+    "@deltek/harmony-components": "file:./vendor/harmony-components",
     "clsx": "^2.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

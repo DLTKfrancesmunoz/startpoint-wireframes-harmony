@@ -1,0 +1,101 @@
+---
+/**
+ * Accordion Component
+ *
+ * Collapsible content sections.
+ * Optional per-item body: use named slots "item-0", "item-1", … "item-9" for custom content
+ * (first 10 items only; Astro requires static slot names). When a slot is absent, item.content is rendered as text.
+ *
+ * @usagePattern named-slots-content Use named slots item-0 through item-9 (max 10 items) to provide custom HTML content for accordion bodies. When a named slot exists for an item index, it takes precedence and the item.content string is ignored. If no named slot exists, the item.content string is rendered as plain text. Do not provide both slot and content for the same item.
+ * @usagePattern allow-multiple-behavior When allowMultiple prop is false (default), clicking an accordion item automatically closes all other open items, allowing only one section open at a time. When allowMultiple is true, multiple sections can remain open simultaneously. This affects the click handler behavior in lines 76-81.
+ * @usagePattern default-open-state Set defaultOpen: true on individual items in the items array to have them open when the accordion first renders. In single-open mode (allowMultiple=false), only the last item with defaultOpen: true will remain open. In multi-open mode, all items marked defaultOpen will be open initially.
+ */
+import Icon from './Icon.astro';
+
+export interface AccordionItem {
+  title: string;
+  content: string;
+  defaultOpen?: boolean;
+}
+
+export interface Props {
+  items: AccordionItem[];
+  allowMultiple?: boolean;
+  class?: string;
+}
+
+const {
+  items,
+  allowMultiple = false,
+  class: className = '',
+} = Astro.props;
+
+const accordionId = `accordion-${Math.random().toString(36).substr(2, 9)}`;
+const classes = ['accordion', className].filter(Boolean).join(' ');
+---
+
+<div class={classes} data-accordion {...(allowMultiple && { 'data-allow-multiple': true })}>
+  {items.map((item, index) => {
+    const slotNames = ['item-0', 'item-1', 'item-2', 'item-3', 'item-4', 'item-5', 'item-6', 'item-7', 'item-8', 'item-9'] as const;
+    const slotName = index < slotNames.length ? slotNames[index] : null;
+    const hasItemSlot = slotName != null && Astro.slots.has(slotName);
+    return (
+    <div class={`accordion__item ${item.defaultOpen ? 'is-open' : ''}`} data-accordion-item>
+      <button
+        type="button"
+        class="accordion__trigger"
+        aria-expanded={item.defaultOpen ? 'true' : 'false'}
+        aria-controls={`${accordionId}-panel-${index}`}
+      >
+        {item.title}
+        <Icon name="chevron-down" class="accordion__icon" />
+      </button>
+      <div 
+        class="accordion__content" 
+        id={`${accordionId}-panel-${index}`}
+        role="region"
+      >
+        {hasItemSlot && slotName === 'item-0' ? <slot name="item-0" /> : hasItemSlot && slotName === 'item-1' ? <slot name="item-1" /> : hasItemSlot && slotName === 'item-2' ? <slot name="item-2" /> : hasItemSlot && slotName === 'item-3' ? <slot name="item-3" /> : hasItemSlot && slotName === 'item-4' ? <slot name="item-4" /> : hasItemSlot && slotName === 'item-5' ? <slot name="item-5" /> : hasItemSlot && slotName === 'item-6' ? <slot name="item-6" /> : hasItemSlot && slotName === 'item-7' ? <slot name="item-7" /> : hasItemSlot && slotName === 'item-8' ? <slot name="item-8" /> : hasItemSlot && slotName === 'item-9' ? <slot name="item-9" /> : item.content}
+      </div>
+    </div>
+    );
+  })}
+</div>
+
+<script>
+  function initAccordions() {
+    document.querySelectorAll('[data-accordion]').forEach((accordion) => {
+      if (accordion.hasAttribute('data-init')) return;
+      accordion.setAttribute('data-init', 'true');
+      
+      const allowMultiple = accordion.hasAttribute('data-allow-multiple');
+      const items = accordion.querySelectorAll('[data-accordion-item]');
+      
+      items.forEach((item) => {
+        const trigger = item.querySelector('.accordion__trigger');
+        
+        trigger?.addEventListener('click', () => {
+          const isOpen = item.classList.contains('is-open');
+          
+          if (!allowMultiple) {
+            items.forEach((i) => {
+              i.classList.remove('is-open');
+              i.querySelector('.accordion__trigger')?.setAttribute('aria-expanded', 'false');
+            });
+          }
+          
+          if (!isOpen) {
+            item.classList.add('is-open');
+            trigger.setAttribute('aria-expanded', 'true');
+          } else {
+            item.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+    });
+  }
+  
+  initAccordions();
+  document.addEventListener('astro:page-load', initAccordions);
+</script>
