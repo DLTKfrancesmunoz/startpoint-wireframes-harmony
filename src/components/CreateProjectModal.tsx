@@ -2,6 +2,7 @@
  * Create Project modal – creation path boxes, form fields per plan, Chip/Link.
  */
 
+import './CreateProjectModal.css';
 import { useState, useMemo } from 'react';
 import { Dialog } from './shell/Dialog';
 import { Input } from './shell/Input';
@@ -179,7 +180,7 @@ export function CreateProjectModal({
       footer={footer}
     >
       {/* Creation path: three option boxes */}
-      <div style={{ ...sectionGapStyle, display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+      <div style={{ ...sectionGapStyle, display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'stretch' }}>
         <div
           role="button"
           tabIndex={0}
@@ -193,13 +194,18 @@ export function CreateProjectModal({
             borderRadius: 'var(--radius-lg)',
             background: form.creationPath === 'new' ? 'var(--theme-primary-light)' : 'var(--card-bg)',
             cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-base)', fontWeight: 600 }}>New Project</h3>
           <p style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
             Create a project with no phase structure. Add phases later if needed.
           </p>
-          <Link href="#">Use Dela</Link>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>or</span>
+            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Use Dela</Link>
+          </div>
         </div>
         <div
           role="button"
@@ -214,13 +220,18 @@ export function CreateProjectModal({
             borderRadius: 'var(--radius-lg)',
             background: form.creationPath === 'copy' ? 'var(--theme-primary-light)' : 'var(--card-bg)',
             cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-base)', fontWeight: 600 }}>Copy Existing</h3>
           <p style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
             Duplicate the phase structure from an existing project. Financial data is not copied.
           </p>
-          <Link href="#">Use Dela</Link>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>or</span>
+            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Use Dela</Link>
+          </div>
         </div>
         <div
           role="button"
@@ -235,13 +246,18 @@ export function CreateProjectModal({
             borderRadius: 'var(--radius-lg)',
             background: form.creationPath === 'template' ? 'var(--theme-primary-light)' : 'var(--card-bg)',
             cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-base)', fontWeight: 600 }}>From Template</h3>
           <p style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
             Apply a template&apos;s phase structure (e.g. A&E or Construction) when the project is created.
           </p>
-          <Link href="#">Use Dela</Link>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>or</span>
+            <Link href="#" className="create-project-modal__dela-pill" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>Use Dela</Link>
+          </div>
         </div>
       </div>
 

@@ -1,0 +1,25 @@
+/* Create Project modal – option box Dela pill (AI purple tint + outline) */
+
+.create-project-modal__dela-pill {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 9999px;
+  background: var(--dela-bubble-bg);
+  border: 1px solid var(--gradient-dela-start);
+  color: var(--gradient-dela-start);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.create-project-modal__dela-pill:hover {
+  background: rgba(138, 51, 194, 0.18);
+  border-color: var(--gradient-dela-end);
+  color: var(--gradient-dela-end);
+}
+
+.create-project-modal__dela-pill:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-primary);
+}
